@@ -27,9 +27,9 @@ export default {
         }
       },
       animation: {
-        'bounce-slow': 'bounce 2s infinite',
-        'pulse-slow': 'pulse 3s infinite',
         'float': 'float 3s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s infinite',
+        'bounce-slow': 'bounce 2s infinite',
       },
       keyframes: {
         float: {

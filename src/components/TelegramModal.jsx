@@ -2,12 +2,7 @@ import React from 'react';
 import { X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface TelegramModalProps {
-  onClose: () => void;
-  onJoinTelegram: () => void;
-}
-
-const TelegramModal: React.FC<TelegramModalProps> = ({ onClose, onJoinTelegram }) => {
+const TelegramModal = ({ onClose, onJoinTelegram }) => {
   const handleJoinTelegram = () => {
     // Open Telegram channel
     window.open('https://t.me/zoggycasino', '_blank');

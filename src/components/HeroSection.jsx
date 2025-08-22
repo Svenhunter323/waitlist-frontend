@@ -1,19 +1,13 @@
 import React, { useState } from 'react';
 import { Mail, Users } from 'lucide-react';
-import { validateEmail } from '../utils/helpers';
+import { validateEmail } from '../types';
 
-interface HeroSectionProps {
-  totalUsers: number;
-  onSignup: (email: string, referralCode?: string) => void;
-}
-
-const HeroSection: React.FC<HeroSectionProps> = ({ totalUsers, onSignup }) => {
+const HeroSection = ({ totalUsers, onSignup }) => {
   const [email, setEmail] = useState('');
-  const [referralCode, setReferralCode] = useState('');
   const [emailError, setEmailError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setEmailError('');
 
@@ -31,7 +25,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ totalUsers, onSignup }) => {
     
     // Simulate API call
     setTimeout(() => {
-      onSignup(email, referralCode || undefined);
+      onSignup(email);
       setIsLoading(false);
     }, 1000);
   };
@@ -68,16 +62,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({ totalUsers, onSignup }) => {
               {emailError && (
                 <p className="text-red-500 text-sm mt-1">{emailError}</p>
               )}
-            </div>
-
-            <div>
-              <input
-                type="text"
-                placeholder="Referral code (optional)"
-                value={referralCode}
-                onChange={(e) => setReferralCode(e.target.value)}
-                className="input-field"
-              />
             </div>
 
             <button

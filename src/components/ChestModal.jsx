@@ -1,16 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Gift, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatCurrency } from '../utils/helpers';
+import { formatCurrency } from '../types';
 
-interface ChestModalProps {
-  onClose: () => void;
-  onChestOpened: () => void;
-}
-
-const ChestModal: React.FC<ChestModalProps> = ({ onClose, onChestOpened }) => {
+const ChestModal = ({ onClose, onChestOpened }) => {
   const [isOpening, setIsOpening] = useState(false);
-  const [prize, setPrize] = useState<number | null>(null);
+  const [prize, setPrize] = useState(null);
   const [showPrize, setShowPrize] = useState(false);
 
   const openChest = () => {
@@ -95,7 +90,7 @@ const ChestModal: React.FC<ChestModalProps> = ({ onClose, onChestOpened }) => {
               <div className="text-6xl">🎉</div>
               <h2 className="text-3xl font-bold text-success-600">Congratulations!</h2>
               <p className="text-xl text-gray-700">
-                You unboxed <span className="font-bold text-gold-500">{formatCurrency(prize!)}</span>
+                You unboxed <span className="font-bold text-gold-500">{formatCurrency(prize)}</span>
               </p>
               
               <div className="flex space-x-4">
