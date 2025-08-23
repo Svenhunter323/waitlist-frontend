@@ -98,7 +98,7 @@ const HeroSection = () => {
                     placeholder="Enter your email address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={`input-field pl-10 ${emailError ? 'border-error-500 ring-error-500' : ''}`}
+                    className={`input-field pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-primary-500 focus:border-transparent ${emailError ? 'border-error-500 ring-error-500' : ''}`}
                     required
                   />
                 </div>

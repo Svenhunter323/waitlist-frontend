@@ -49,11 +49,11 @@ const FakeWinsFeed = () => {
 
   const getWinStyle = (type, amount) => {
     if (type === 'jackpot' || amount > 1000) {
-      return 'ring-2 ring-gold-200 bg-gradient-to-r from-gold-50 to-warning-50'
+      return 'ring-2 ring-gold-200 dark:ring-gold-600 bg-gradient-to-r from-gold-50 to-warning-50 dark:from-gold-900/20 dark:to-warning-900/20'
     } else if (amount > 500) {
-      return 'ring-2 ring-warning-200 bg-warning-50'
+      return 'ring-2 ring-warning-200 dark:ring-warning-600 bg-warning-50 dark:bg-warning-900/20'
     } else {
-      return 'bg-white'
+      return 'bg-white dark:bg-gray-800'
     }
   }
 
@@ -73,7 +73,7 @@ const FakeWinsFeed = () => {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className={`flex items-center justify-between p-4 rounded-lg shadow-sm border border-gray-200 transition-all duration-300 ${
+                className={`flex items-center justify-between p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 transition-all duration-300 ${
                   getWinStyle(win.type, win.amount)
                 } ${index === 0 ? 'animate-glow' : ''}`}
               >
