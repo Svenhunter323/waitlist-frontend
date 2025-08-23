@@ -4,6 +4,7 @@ import { useApi } from '../hooks/useApi'
 import { waitlistApi } from '../api/endpoints'
 import { Mail, CheckCircle, RefreshCw, ArrowLeft, Clock } from 'lucide-react'
 import LoadingSpinner from '../components/LoadingSpinner'
+import ThemeToggle from '../components/ThemeToggle'
 
 const EmailVerification = () => {
   const { pendingVerification, dispatch, notifications } = useAppContext()
@@ -109,6 +110,11 @@ const EmailVerification = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-purple-50 flex items-center justify-center px-6">
+      {/* Theme Toggle for Email Verification */}
+      <div className="fixed top-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
+      
       <div className="max-w-md mx-auto">
         <button
           onClick={handleBackToLanding}

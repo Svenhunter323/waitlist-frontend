@@ -2,6 +2,7 @@ import React from 'react'
 import { useAppContext } from '../contexts/AppContext'
 import { formatCurrency } from '../utils/userUtils'
 import { Settings } from 'lucide-react'
+import ThemeToggle from './ThemeToggle'
 
 const Header = () => {
   const { user, dispatch } = useAppContext()
@@ -56,6 +57,8 @@ const Header = () => {
           >
             <Settings className="w-5 h-5" />
           </button>
+
+          <ThemeToggle />
         </div>
       </div>
     </header>

@@ -30,35 +30,35 @@ const ReferralSection = () => {
   }
 
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-white dark:bg-gray-900">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">
             Invite Friends & Earn More
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 dark:text-gray-300">
             Get $100 credits for every friend who joins using your referral link
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Referral Stats */}
-          <div className="card bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">Your Referral Stats</h3>
+          <div className="card bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-purple-200 dark:border-purple-700">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Your Referral Stats</h3>
             
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-white rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <Users className="w-6 h-6 text-purple-600" />
-                  <span className="font-semibold text-gray-700">Friends Referred</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Friends Referred</span>
                 </div>
                 <span className="text-2xl font-bold text-purple-600">{user.referredUsers}</span>
               </div>
               
-              <div className="flex items-center justify-between p-4 bg-white rounded-lg">
+              <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <Gift className="w-6 h-6 text-success-600" />
-                  <span className="font-semibold text-gray-700">Referral Earnings</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Referral Earnings</span>
                 </div>
                 <span className="text-2xl font-bold text-success-600">
                   ${(user.referredUsers * 100).toLocaleString()}
@@ -69,11 +69,11 @@ const ReferralSection = () => {
 
           {/* Referral Link */}
           <div className="card">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">Your Referral Link</h3>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Your Referral Link</h3>
             
             <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                <p className="text-sm text-gray-600 mb-2">Your unique referral code:</p>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Your unique referral code:</p>
                 <p className="text-2xl font-bold text-primary-600 font-mono">{user.referralCode}</p>
               </div>
               

@@ -43,24 +43,24 @@ const UserStats = () => {
     <section className="py-12 px-6">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Your Dashboard</h2>
-          <p className="text-gray-600">Welcome back! Here's your current status.</p>
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-2">Your Dashboard</h2>
+          <p className="text-gray-600 dark:text-gray-300">Welcome back! Here's your current status.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
-            <div key={index} className="card text-center">
+            <div key={index} className="card text-center dark:bg-gray-800 dark:border-gray-700">
               <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center mx-auto mb-4`}>
                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
-              <p className="text-2xl font-bold text-gray-800 mb-1">{stat.value}</p>
-              <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white mb-1">{stat.value}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm font-medium">{stat.label}</p>
             </div>
           ))}
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             You're among <span className="font-bold text-primary-600">{totalUsers.toLocaleString()}</span> early adopters
           </p>
         </div>

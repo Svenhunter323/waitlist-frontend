@@ -53,13 +53,13 @@ const DailyChest = () => {
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Star className="w-8 h-8 text-gold-500" />
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800">Daily Chest</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">Daily Chest</h2>
             <Star className="w-8 h-8 text-gold-500" />
           </div>
-          <p className="text-xl text-gray-600">Open your daily chest to win amazing prizes!</p>
+          <p className="text-xl text-gray-600 dark:text-gray-300">Open your daily chest to win amazing prizes!</p>
         </div>
         
-        <div className="card max-w-md mx-auto bg-gradient-to-br from-white to-gold-50 border-gold-200">
+        <div className="card max-w-md mx-auto bg-gradient-to-br from-white to-gold-50 dark:from-gray-800 dark:to-gray-700 border-gold-200 dark:border-gray-600">
           <div className="w-32 h-32 mx-auto mb-6 relative">
             <div className={`w-full h-full bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl shadow-2xl flex items-center justify-center transform transition-all duration-300 ${
               canOpen ? 'animate-float hover:scale-110 chest-glow cursor-pointer' : 'opacity-60'
