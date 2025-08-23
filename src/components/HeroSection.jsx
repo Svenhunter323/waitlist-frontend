@@ -41,6 +41,8 @@ const HeroSection = () => {
       
       const result = await execute(() => waitlistApi.joinWaitlist(email, referralCode))
       
+      console.log(result);
+
       if (result.success) {
         dispatch({ type: 'SIGNUP_USER', payload: result.user })
         setEmail('')
