@@ -58,14 +58,14 @@ const FakeWinsFeed = () => {
   }
 
   return (
-    <section className="py-20 px-6 bg-gray-50">
+    <section className="py-20 px-6 bg-gray-50 dark:bg-gray-800">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Live Wins</h2>
-          <p className="text-xl text-gray-600">See what others are winning right now!</p>
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">Live Wins</h2>
+          <p className="text-xl text-gray-600 dark:text-gray-300">See what others are winning right now!</p>
         </div>
 
-        <div className="card bg-gradient-to-br from-white to-gray-50">
+        <div className="card bg-gradient-to-br from-white to-gray-50 dark:from-gray-700 dark:to-gray-800">
           <div className="space-y-3 max-h-96 overflow-hidden">
             {wins.map((win, index) => (
               <motion.div
@@ -82,8 +82,8 @@ const FakeWinsFeed = () => {
                     {getWinIcon(win.type, win.amount)}
                   </div>
                   <div className="text-left">
-                    <p className="font-semibold text-gray-800">{win.username}</p>
-                    <p className="text-sm text-gray-500">
+                    <p className="font-semibold text-gray-800 dark:text-white">{win.username}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {win.type === 'jackpot' ? 'hit the jackpot!' : 'opened a chest'}
                     </p>
                   </div>
@@ -108,7 +108,7 @@ const FakeWinsFeed = () => {
           </div>
           
           {wins.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               <Trophy className="w-16 h-16 mx-auto mb-4 opacity-50" />
               <p className="text-lg">Wins will appear here...</p>
             </div>
@@ -116,7 +116,7 @@ const FakeWinsFeed = () => {
         </div>
 
         <div className="text-center mt-8">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-300">
             <span className="font-bold text-success-600">{wins.length}</span> recent wins • 
             Updates every few seconds
           </p>

@@ -55,7 +55,7 @@ const HeroSection = () => {
   }
 
   return (
-    <section className="min-h-screen gradient-bg flex items-center justify-center px-6 py-12">
+    <section className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-6 py-12">
       {/* Theme Toggle for Landing Page */}
       <div className="fixed top-6 right-6 z-50">
         <ThemeToggle />
@@ -72,27 +72,27 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-800 mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-800 dark:text-white mb-6 leading-tight">
             Open Your Daily Chest &<br />
             <span className="text-gradient">
               Win Real Rewards
             </span>
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-600 mb-8 font-semibold">
+          <p className="text-2xl md:text-3xl text-gray-600 dark:text-gray-300 mb-8 font-semibold">
             Win up to <span className="text-gold-500 font-bold">$10,000</span> every day
           </p>
-          <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-600 dark:text-gray-300 mb-12 max-w-2xl mx-auto">
             Join thousands of users earning daily rewards. Get early access to our platform and start winning immediately.
           </p>
         </div>
 
         {!user ? (
-          <div className="card max-w-md mx-auto mb-8 bg-gradient-to-br from-white to-gray-50">
-            <h3 className="text-2xl font-bold text-gray-800 mb-6">Join the Waitlist</h3>
+          <div className="card max-w-md mx-auto mb-8 bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-700">
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Join the Waitlist</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                   <input
                     type="email"
                     placeholder="Enter your email address"
@@ -126,7 +126,7 @@ const HeroSection = () => {
               </button>
             </form>
             
-            <p className="text-sm text-gray-500 mt-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
               No spam, unsubscribe anytime. Start earning immediately after signup.
             </p>
           </div>
@@ -145,7 +145,7 @@ const HeroSection = () => {
           </div>
         )}
 
-        <div className="flex items-center justify-center space-x-2 text-gray-600">
+        <div className="flex items-center justify-center space-x-2 text-gray-600 dark:text-gray-300">
           <Users className="w-5 h-5" />
           <span className="text-lg font-semibold">
             {totalUsers.toLocaleString()} people in line
