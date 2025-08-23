@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { useAppContext } from '../contexts/AppContext'
+import { SUCCESS_MESSAGES } from '../utils/constants'
 import { Copy, Share2, Users, Gift, CheckCircle } from 'lucide-react'
 import { generateReferralLink, copyToClipboard } from '../utils/userUtils'
 
 const ReferralSection = () => {
-  const { user } = useAppContext()
+  const { user, notifications } = useAppContext()
   const [copied, setCopied] = useState(false)
 
   if (!user) return null
@@ -15,7 +16,10 @@ const ReferralSection = () => {
     const success = await copyToClipboard(referralLink)
     if (success) {
       setCopied(true)
+      notifications.showSuccess(SUCCESS_MESSAGES.LINK_COPIED)
       setTimeout(() => setCopied(false), 2000)
+    } else {
+      notifications.showError('Failed to copy link to clipboard')
     }
   }
 

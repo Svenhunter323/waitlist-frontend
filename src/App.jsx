@@ -1,5 +1,6 @@
 import React from 'react'
 import { useAppContext } from './contexts/AppContext'
+import ErrorBoundary from './components/ErrorBoundary'
 import LandingPage from './pages/LandingPage'
 import Dashboard from './pages/Dashboard'
 import AdminDashboard from './pages/AdminDashboard'
@@ -19,9 +20,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {renderCurrentView()}
-    </div>
+    <ErrorBoundary>
+      <div className="min-h-screen bg-white">
+        {renderCurrentView()}
+      </div>
+    </ErrorBoundary>
   )
 }
 

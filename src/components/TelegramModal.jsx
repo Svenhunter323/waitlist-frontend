@@ -1,13 +1,34 @@
 import React from 'react'
+import { useApi } from '../hooks/useApi'
+import { telegramApi } from '../api/endpoints'
+import { useAppContext } from '../contexts/AppContext'
 import { X, MessageCircle, ExternalLink, CheckCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const TelegramModal = ({ onClose, onJoinTelegram }) => {
-  const handleJoinTelegram = () => {
-    // Open Telegram channel
-    window.open('https://t.me/zoggycasino', '_blank')
+  const { user } = useAppContext()
+  const { execute } = useApi()
+
+  const handleJoinTelegram = async () => {
+    try {
+      // Get Telegram deeplink from API
+      const result = await execute(() => telegramApi.getTelegramDeeplink(user.id))
+      
+      if (result.success) {
+        // Open Telegram with deeplink
+        window.open(result.deeplink, '_blank')
+        
+        // Also open the channel link
+        setTimeout(() => {
+          window.open(result.channelLink, '_blank')
+        }, 1000)
+      }
+    } catch (error) {
+      // Fallback to direct channel link
+      window.open('https://t.me/zoggycasino', '_blank')
+    }
     
-    // Simulate user joining (in real app, this would be verified via Telegram bot)
+    // Simulate user joining verification
     setTimeout(() => {
       onJoinTelegram()
     }, 2000)

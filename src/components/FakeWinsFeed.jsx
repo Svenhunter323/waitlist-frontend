@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react'
+import { useApi } from '../hooks/useApi'
+import { winsApi } from '../api/endpoints'
 import { Trophy, DollarSign, Zap, Crown } from 'lucide-react'
 import { formatCurrency } from '../utils/userUtils'
 import { generateFakeWin } from '../utils/mockData'
@@ -7,11 +9,24 @@ import { motion } from 'framer-motion';
 
 const FakeWinsFeed = () => {
   const [wins, setWins] = useState([])
+  const { execute } = useApi()
 
   useEffect(() => {
-    // Initialize with some wins
-    const initialWins = Array.from({ length: 8 }, generateFakeWin)
-    setWins(initialWins)
+    // Load initial wins from API
+    const loadWins = async () => {
+      try {
+        const result = await execute(() => winsApi.getLastWins(8))
+        if (result.success) {
+          setWins(result.wins)
+        }
+      } catch (error) {
+        // Fallback to mock data
+        const initialWins = Array.from({ length: 8 }, generateFakeWin)
+        setWins(initialWins)
+      }
+    }
+
+    loadWins()
 
     // Add new wins periodically
     const interval = setInterval(() => {
@@ -20,7 +35,7 @@ const FakeWinsFeed = () => {
     }, 2000 + Math.random() * 3000) // Random interval between 2-5 seconds
 
     return () => clearInterval(interval)
-  }, [])
+  }, [execute])
 
   const getWinIcon = (type, amount) => {
     if (type === 'jackpot' || amount > 1000) {
