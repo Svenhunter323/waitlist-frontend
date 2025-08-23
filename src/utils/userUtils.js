@@ -20,6 +20,7 @@ export const createUser = (email, referralCode = null) => {
   return {
     id: generateUserId(),
     email,
+    emailVerified: false,
     position,
     referralCode: generateReferralCode(),
     referredUsers: 0,

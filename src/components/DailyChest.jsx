@@ -45,7 +45,7 @@ const DailyChest = () => {
     })
   }
 
-  if (!user) return null
+  if (!user || !user.emailVerified) return null
 
   return (
     <section className="py-20 px-6 bg-gradient-to-br from-gold-50 to-warning-50">

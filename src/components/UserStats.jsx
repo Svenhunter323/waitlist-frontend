@@ -6,7 +6,7 @@ import { formatCurrency } from '../utils/userUtils'
 const UserStats = () => {
   const { user, totalUsers } = useAppContext()
 
-  if (!user) return null
+  if (!user || !user.emailVerified) return null
 
   const stats = [
     {

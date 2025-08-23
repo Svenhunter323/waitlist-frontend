@@ -8,7 +8,7 @@ const ReferralSection = () => {
   const { user, notifications } = useAppContext()
   const [copied, setCopied] = useState(false)
 
-  if (!user) return null
+  if (!user || !user.emailVerified) return null
 
   const referralLink = generateReferralLink(user.referralCode)
 

@@ -2,6 +2,7 @@ export const initialUserState = {
   user: null,
   totalUsers: 12847,
   currentView: 'landing',
+  pendingVerification: null,
   isLoading: false,
   error: null
 }
@@ -20,11 +21,29 @@ export const userReducer = (state, action) => {
     case 'SIGNUP_USER':
       return {
         ...state,
-        user: action.payload,
+        user: action.payload.emailVerified ? action.payload : null,
+        pendingVerification: action.payload.emailVerified ? null : action.payload,
         totalUsers: state.totalUsers + 1,
+        currentView: action.payload.emailVerified ? 'dashboard' : 'email-verification',
+        isLoading: false,
+        error: null
+      }
+    
+    case 'EMAIL_VERIFIED':
+      return {
+        ...state,
+        user: action.payload,
+        pendingVerification: null,
         currentView: 'dashboard',
         isLoading: false,
         error: null
+      }
+    
+    case 'SET_PENDING_VERIFICATION':
+      return {
+        ...state,
+        pendingVerification: action.payload,
+        currentView: 'email-verification'
       }
     
     case 'LOAD_USER':

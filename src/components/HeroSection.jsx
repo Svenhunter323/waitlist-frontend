@@ -44,6 +44,9 @@ const HeroSection = () => {
       if (result.success) {
         dispatch({ type: 'SIGNUP_USER', payload: result.user })
         setEmail('')
+        if (!result.user.emailVerified) {
+          notifications.showSuccess('Please check your email to verify your account!')
+        }
       }
     } catch (error) {
       setEmailError(error.message)

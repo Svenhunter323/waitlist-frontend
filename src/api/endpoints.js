@@ -9,6 +9,18 @@ export const waitlistApi = {
     })
   },
 
+  // POST /api/resend-verification
+  async resendVerification(email) {
+    return await apiClient.post('/resend-verification', {
+      email
+    })
+  },
+
+  // GET /api/verify-email
+  async verifyEmail(token) {
+    return await apiClient.get(`/verify-email?token=${token}`)
+  },
+
   // GET /api/waitlist/stats
   async getWaitlistStats() {
     return await apiClient.get('/waitlist/stats')

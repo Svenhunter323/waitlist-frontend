@@ -14,10 +14,44 @@ export const mockApi = {
     }
     
     const user = createUser(email, referralCode)
+    // Simulate email verification requirement
+    user.emailVerified = false
+    user.verificationToken = Math.random().toString(36).substring(2, 15)
+    
     return {
       success: true,
       user,
-      message: 'Successfully joined waitlist'
+      message: 'Please check your email to verify your account'
+    }
+  },
+
+  // POST /api/resend-verification
+  async resendVerification(email) {
+    await delay(800)
+    
+    return {
+      success: true,
+      message: 'Verification email sent successfully'
+    }
+  },
+
+  // GET /api/verify-email
+  async verifyEmail(token) {
+    await delay(1000)
+    
+    // Simulate token validation
+    if (!token || token.length < 10) {
+      throw new Error('Invalid or expired verification token')
+    }
+    
+    // Create verified user
+    const user = createUser('verified@example.com', null)
+    user.emailVerified = true
+    
+    return {
+      success: true,
+      user,
+      message: 'Email verified successfully'
     }
   },
 
