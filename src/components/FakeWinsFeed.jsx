@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { Trophy, DollarSign, Zap, Crown } from 'lucide-react'
 import { formatCurrency } from '../utils/userUtils'
 import { generateFakeWin } from '../utils/mockData'
+import { motion } from 'framer-motion';
+
 
 const FakeWinsFeed = () => {
   const [wins, setWins] = useState([])

@@ -6,6 +6,7 @@ import { validateEmail, createUser } from '../utils/userUtils'
 const HeroSection = () => {
   const { user, totalUsers, dispatch } = useAppContext()
   const [email, setEmail] = useState('')
+  const [referralCode, setReferralCode] = useState('')
   const [emailError, setEmailError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
