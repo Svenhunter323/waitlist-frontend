@@ -1,3 +1,5 @@
+import { validateEmail as validateEmailUtil } from './validation'
+
 export const generateUserId = () => {
   return Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
 }
@@ -69,8 +71,8 @@ export const getNextChestTime = (lastChestOpen) => {
 }
 
 export const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+  const result = validateEmailUtil(email)
+  return result.isValid
 }
 
 export const copyToClipboard = async (text) => {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAppContext } from '../contexts/AppContext'
+import { useApi } from '../hooks/useApi'
+import { waitlistApi } from '../api/endpoints'
 import { Mail, Users, CheckCircle, Gift } from 'lucide-react'
 import { validateEmail, createUser } from '../utils/userUtils'
 
@@ -7,7 +9,7 @@ const HeroSection = () => {
   const { user, totalUsers, dispatch } = useAppContext()
   const [email, setEmail] = useState('')
   const [emailError, setEmailError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const { loading: isLoading, error: apiError, execute, clearError } = useApi()
 
   // Check for referral code in URL
   useEffect(() => {
@@ -21,6 +23,7 @@ const HeroSection = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setEmailError('')
+    clearError()
 
     if (!email) {
       setEmailError('Email is required')
@@ -32,16 +35,18 @@ const HeroSection = () => {
       return
     }
 
-    setIsLoading(true)
-    dispatch({ type: 'SET_LOADING', payload: true })
-    
-    // Simulate API call
-    setTimeout(() => {
+    try {
       const referralCode = localStorage.getItem('referralCode')
-      const newUser = createUser(email, referralCode)
-      dispatch({ type: 'SIGNUP_USER', payload: newUser })
-      setIsLoading(false)
-    }, 1500)
+      
+      const result = await execute(() => waitlistApi.joinWaitlist(email, referralCode))
+      
+      if (result.success) {
+        dispatch({ type: 'SIGNUP_USER', payload: result.user })
+        setEmail('')
+      }
+    } catch (error) {
+      setEmailError(error.message)
+    }
   }
 
   return (
@@ -89,6 +94,9 @@ const HeroSection = () => {
                 </div>
                 {emailError && (
                   <p className="text-error-500 text-sm mt-1 text-left">{emailError}</p>
+                )}
+                {apiError && (
+                  <p className="text-error-500 text-sm mt-1 text-left">{apiError}</p>
                 )}
               </div>
 

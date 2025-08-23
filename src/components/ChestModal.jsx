@@ -1,24 +1,37 @@
 import React, { useState } from 'react'
+import { useApi } from '../hooks/useApi'
+import { chestApi } from '../api/endpoints'
+import { useAppContext } from '../contexts/AppContext'
 import { X, Gift, Share2, Trophy, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatCurrency } from '../utils/userUtils'
 
 const ChestModal = ({ onClose, onChestOpened }) => {
-  const [isOpening, setIsOpening] = useState(false)
+  const { user } = useAppContext()
+  const { loading: isOpening, execute } = useApi()
   const [prize, setPrize] = useState(null)
   const [showPrize, setShowPrize] = useState(false)
 
-  const openChest = () => {
-    setIsOpening(true)
-    
-    // Simulate chest opening animation
-    setTimeout(() => {
-      const prizeAmount = Math.floor(Math.random() * 1000) + 10 // $10-$1010
-      setPrize(prizeAmount)
-      setShowPrize(true)
-      setIsOpening(false)
-      onChestOpened(prizeAmount)
-    }, 3000)
+  const openChest = async () => {
+    try {
+      const result = await execute(() => chestApi.openChest(user.id))
+      
+      // Simulate chest opening animation delay
+      setTimeout(() => {
+        setPrize(result.reward)
+        setShowPrize(true)
+        onChestOpened(result.reward)
+      }, 3000)
+    } catch (error) {
+      console.error('Failed to open chest:', error)
+      // Fallback to mock behavior
+      setTimeout(() => {
+        const prizeAmount = Math.floor(Math.random() * 1000) + 10
+        setPrize(prizeAmount)
+        setShowPrize(true)
+        onChestOpened(prizeAmount)
+      }, 3000)
+    }
   }
 
   const shareOnTwitter = () => {

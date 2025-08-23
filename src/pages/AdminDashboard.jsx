@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { useAppContext } from '../contexts/AppContext'
+import { useApi } from '../hooks/useApi'
+import { adminApi } from '../api/endpoints'
+import AdminLogin from '../components/AdminLogin'
 import { mockAdminStats } from '../utils/mockData'
 import { 
   Users, 
@@ -10,56 +13,116 @@ import {
   Percent,
   ArrowLeft,
   Eye,
-  EyeOff
+  EyeOff,
+  Download,
+  LogOut
 } from 'lucide-react'
 
 const AdminDashboard = () => {
   const { dispatch } = useAppContext()
+  const { loading, execute } = useApi()
+  const [adminUser, setAdminUser] = useState(null)
   const [showCredentials, setShowCredentials] = useState(false)
+  const [stats, setStats] = useState(mockAdminStats)
+
+  // Check if admin is logged in
+  React.useEffect(() => {
+    const token = localStorage.getItem('admin_token')
+    if (token) {
+      // In a real app, verify token with API
+      setAdminUser({ email: 'admin@zoggy.com', role: 'admin' })
+      loadAdminStats()
+    }
+  }, [])
+
+  const loadAdminStats = async () => {
+    try {
+      const result = await execute(() => adminApi.getStats())
+      if (result.success) {
+        setStats(result.stats)
+      }
+    } catch (error) {
+      // Fallback to mock data
+      console.log('Using mock admin stats')
+    }
+  }
+
+  const handleLoginSuccess = (user) => {
+    setAdminUser(user)
+    loadAdminStats()
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('admin_token')
+    setAdminUser(null)
+  }
+
+  const handleExportUsers = async (format = 'csv') => {
+    try {
+      const blob = await execute(() => adminApi.exportUsers(format))
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `zoggy-users-${new Date().toISOString().split('T')[0]}.${format}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Export failed:', error)
+    }
+  }
+
+  // Show login form if not authenticated
+  if (!adminUser) {
+    return <AdminLogin onLoginSuccess={handleLoginSuccess} />
+  }
 
   const handleBackToLanding = () => {
     dispatch({ type: 'SET_VIEW', payload: 'landing' })
   }
 
-  const stats = [
+  const statsConfig = [
     {
       title: 'Total Users',
-      value: mockAdminStats.totalUsers.toLocaleString(),
+      value: stats.totalUsers.toLocaleString(),
       icon: Users,
       color: 'text-primary-600',
       bgColor: 'bg-primary-50'
     },
     {
       title: 'Signups Today',
-      value: mockAdminStats.totalSignupsToday.toLocaleString(),
+      value: stats.totalSignupsToday.toLocaleString(),
       icon: TrendingUp,
       color: 'text-success-600',
       bgColor: 'bg-success-50'
     },
     {
       title: 'Credits Distributed',
-      value: mockAdminStats.totalCreditsDistributed.toLocaleString(),
+      value: stats.totalCreditsDistributed.toLocaleString(),
       icon: DollarSign,
       color: 'text-warning-600',
       bgColor: 'bg-warning-50'
     },
     {
       title: 'Chests Opened',
-      value: mockAdminStats.totalChestsOpened.toLocaleString(),
+      value: stats.totalChestsOpened.toLocaleString(),
       icon: Gift,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50'
     },
     {
       title: 'Telegram Members',
-      value: mockAdminStats.telegramMembers.toLocaleString(),
+      value: stats.telegramMembers.toLocaleString(),
       icon: MessageCircle,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50'
     },
     {
       title: 'Conversion Rate',
-      value: `${mockAdminStats.conversionRate}%`,
+      value: `${stats.conversionRate}%`,
       icon: Percent,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50'
@@ -81,9 +144,20 @@ const AdminDashboard = () => {
               </button>
               <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-6">
+              <div className="hidden sm:block text-right">
+                <p className="text-sm text-gray-600">Logged in as</p>
+                <p className="font-semibold text-gray-800">{adminUser.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="btn-secondary flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
               <img src="/logo.svg" alt="Zoggy" className="w-8 h-8" />
-              <span className="text-xl font-bold text-gray-800">Zoggy Admin</span>
+              <span className="hidden sm:inline text-xl font-bold text-gray-800">Zoggy Admin</span>
             </div>
           </div>
         </div>
@@ -117,7 +191,7 @@ const AdminDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {stats.map((stat, index) => (
+          {statsConfig.map((stat, index) => (
             <div key={index} className="card">
               <div className="flex items-center justify-between">
                 <div>
@@ -132,12 +206,32 @@ const AdminDashboard = () => {
           ))}
         </div>
 
+        {/* Export Section */}
+        <div className="card mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Export Data</h3>
+              <p className="text-gray-600">Download user data for analysis</p>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => handleExportUsers('csv')}
+                disabled={loading}
+                className="btn-secondary flex items-center space-x-2"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export CSV</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Top Referrers */}
           <div className="card">
             <h3 className="text-xl font-bold text-gray-800 mb-6">Top Referrers</h3>
             <div className="space-y-4">
-              {mockAdminStats.topReferrers.map((referrer, index) => (
+              {stats.topReferrers.map((referrer, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -160,7 +254,7 @@ const AdminDashboard = () => {
           <div className="card">
             <h3 className="text-xl font-bold text-gray-800 mb-6">Recent Signups</h3>
             <div className="space-y-4">
-              {mockAdminStats.recentSignups.map((signup, index) => (
+              {stats.recentSignups.map((signup, index) => (
                 <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                   <div>
                     <p className="font-semibold text-gray-800">{signup.email}</p>
