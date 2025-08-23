@@ -1,58 +1,26 @@
-import React, { useState, useEffect } from 'react'
-import Header from './components/Header'
-import HeroSection from './components/HeroSection'
-import DailyChest from './components/DailyChest'
-import FakeWinsFeed from './components/FakeWinsFeed'
-import Footer from './components/Footer'
-import { useLocalStorage } from './hooks/useLocalStorage'
-import { createUser } from './utils/userUtils'
+import React from 'react'
+import { useAppContext } from './contexts/AppContext'
+import LandingPage from './pages/LandingPage'
+import Dashboard from './pages/Dashboard'
+import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
-  const [user, setUser] = useLocalStorage('zoggy_user', null)
-  const [totalUsers, setTotalUsers] = useState(9327)
+  const { currentView } = useAppContext()
 
-  const handleSignup = (email, referralCode = null) => {
-    const newUser = createUser(email, referralCode)
-    setUser(newUser)
-    setTotalUsers(prev => prev + 1)
-  }
-
-  const handleOpenChest = () => {
-    if (user) {
-      const updatedUser = {
-        ...user,
-        lastChestOpen: new Date().toISOString(),
-        credits: user.credits + Math.floor(Math.random() * 100) + 1
-      }
-      setUser(updatedUser)
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'dashboard':
+        return <Dashboard />
+      case 'admin':
+        return <AdminDashboard />
+      default:
+        return <LandingPage />
     }
   }
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-      
-      {!user ? (
-        <HeroSection 
-          totalUsers={totalUsers} 
-          onSignup={handleSignup} 
-        />
-      ) : (
-        <>
-          <HeroSection 
-            totalUsers={totalUsers} 
-            onSignup={handleSignup}
-            user={user}
-          />
-          <DailyChest 
-            user={user} 
-            onOpenChest={handleOpenChest} 
-          />
-        </>
-      )}
-      
-      <FakeWinsFeed />
-      <Footer />
+      {renderCurrentView()}
     </div>
   )
 }

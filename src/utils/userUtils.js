@@ -1,15 +1,6 @@
-// User data structure and utility functions
-export const createUser = (email, referralCode = null) => ({
-  id: generateUserId(),
-  email,
-  position: Math.floor(Math.random() * 1000) + 9327,
-  referralCode: generateReferralCode(),
-  referredUsers: 0,
-  credits: 0,
-  claimCode: generateClaimCode(),
-  lastChestOpen: null,
-  hasJoinedTelegram: false,
-})
+export const generateUserId = () => {
+  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
+}
 
 export const generateReferralCode = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -21,14 +12,31 @@ export const generateClaimCode = () => {
   return `${prefix}-${suffix}`
 }
 
-export const generateUserId = () => {
-  return Math.random().toString(36).substring(2, 15)
+export const createUser = (email, referralCode = null) => {
+  const position = Math.floor(Math.random() * 1000) + 12847
+  
+  return {
+    id: generateUserId(),
+    email,
+    position,
+    referralCode: generateReferralCode(),
+    referredUsers: 0,
+    credits: 0,
+    totalEarned: 0,
+    claimCode: generateClaimCode(),
+    lastChestOpen: null,
+    hasJoinedTelegram: false,
+    joinedAt: new Date().toISOString(),
+    referredBy: referralCode
+  }
 }
 
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(amount)
 }
 
@@ -63,4 +71,18 @@ export const getNextChestTime = (lastChestOpen) => {
 export const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
+}
+
+export const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error)
+    return false
+  }
+}
+
+export const generateReferralLink = (referralCode) => {
+  return `${window.location.origin}?ref=${referralCode}`
 }
