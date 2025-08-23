@@ -4,7 +4,6 @@ import { useApi } from '../hooks/useApi'
 import { waitlistApi } from '../api/endpoints'
 import { Mail, Users, CheckCircle, Gift } from 'lucide-react'
 import { validateEmail, createUser } from '../utils/userUtils'
-import ThemeToggle from './ThemeToggle'
 
 const HeroSection = () => {
   const { user, totalUsers, dispatch } = useAppContext()
@@ -56,11 +55,6 @@ const HeroSection = () => {
 
   return (
     <section className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-6 py-12">
-      {/* Theme Toggle for Landing Page */}
-      {/* <div className="fixed top-6 right-6 z-50">
-        <ThemeToggle />
-      </div> */}
-      
       <div className="max-w-4xl mx-auto text-center">
         <div className="mb-12">
           <div className="flex justify-center mb-8">

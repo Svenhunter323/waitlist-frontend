@@ -33,6 +33,7 @@ export const ThemeProvider = ({ children }) => {
     } else {
       root.classList.remove('dark')
     }
+    console.log(theme)
     localStorage.setItem('zoggy-theme', theme)
   }, [theme])
 
