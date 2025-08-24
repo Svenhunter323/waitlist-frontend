@@ -1,31 +1,36 @@
 import React from 'react'
-import { useAppContext } from '../contexts/AppContext'
+import { useAuth } from '../contexts/AuthContext'
+import { Navigate } from 'react-router-dom'
 import Header from '../components/Header'
-import UserStats from '../components/UserStats'
 import DailyChest from '../components/DailyChest'
 import ReferralSection from '../components/ReferralSection'
-import FakeWinsFeed from '../components/FakeWinsFeed'
-import Footer from '../components/Footer'
-import EmailVerification from './EmailVerification'
 
 const Dashboard = () => {
-  const { user } = useAppContext()
+  const { user, isAuthenticated, isLoading } = useAuth()
 
-  // If user exists but email is not verified, show verification page
-  if (user && !user.emailVerified) {
-    return <EmailVerification />
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  if (!user?.emailVerified) {
+    return <Navigate to="/verify-email" replace />
   }
 
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <UserStats />
+      <div className="min-h-screen bg-gray-950">
         <DailyChest />
         <ReferralSection />
-        <FakeWinsFeed />
       </div>
-      <Footer />
     </>
   )
 }

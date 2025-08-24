@@ -1,105 +1,108 @@
-import apiClient from './apiClient'
+import axios from 'axios'
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token')
+      window.location.href = '/'
+    }
+    return Promise.reject(error.response?.data || error.message)
+  }
+)
 
 export const waitlistApi = {
-  // POST /api/waitlist
   async joinWaitlist(email, referralCode = null) {
-    return await apiClient.post('/waitlist', {
-      email,
-      referralCode
+    return await api.post('/waitlist', { email, referralCode })
+  }
+}
+
+export const authApi = {
+  async getMe(token) {
+    return await api.get('/me', {
+      headers: { Authorization: `Bearer ${token}` }
     })
   },
 
-  // POST /api/resend-verification
   async resendVerification(email) {
-    return await apiClient.post('/resend-verification', {
-      email
-    })
-  },
-
-  // GET /api/verify-email
-  async verifyEmail(token) {
-    return await apiClient.get(`/verify-email?token=${token}`)
-  },
-
-  // GET /api/waitlist/stats
-  async getWaitlistStats() {
-    return await apiClient.get('/waitlist/stats')
-  }
-}
-
-export const userApi = {
-  // GET /api/dashboard
-  async getDashboard(userId) {
-    return await apiClient.get(`/dashboard/${userId}`)
-  },
-
-  // PUT /api/user/telegram
-  async updateTelegramStatus(userId, telegramVerified = true) {
-    return await apiClient.put(`/user/${userId}/telegram`, {
-      telegramVerified
-    })
-  }
-}
-
-export const chestApi = {
-  // POST /api/open-chest
-  async openChest(userId) {
-    return await apiClient.post('/open-chest', {
-      userId
-    })
-  },
-
-  // GET /api/chest/status
-  async getChestStatus(userId) {
-    return await apiClient.get(`/chest/status/${userId}`)
-  }
-}
-
-export const winsApi = {
-  // GET /api/last-wins
-  async getLastWins(limit = 10) {
-    return await apiClient.get(`/last-wins?limit=${limit}`)
+    return await api.post('/auth/resend', { email })
   }
 }
 
 export const telegramApi = {
-  // GET /api/telegram/deeplink
-  async getTelegramDeeplink(userId) {
-    return await apiClient.get(`/telegram/deeplink/${userId}`)
+  async getDeeplink() {
+    return await api.get('/telegram/deeplink')
   },
 
-  // POST /api/telegram/verify
-  async verifyTelegramUser(userId, telegramData) {
-    return await apiClient.post('/telegram/verify', {
-      userId,
-      telegramData
-    })
+  async getVerifyStatus() {
+    return await api.get('/telegram/verify-status')
+  }
+}
+
+export const chestApi = {
+  async openChest() {
+    return await api.post('/chest/open')
+  }
+}
+
+export const winsApi = {
+  async getLatestWins(limit = 24) {
+    return await api.get(`/wins/latest?limit=${limit}`)
+  }
+}
+
+export const leaderboardApi = {
+  async getTop10() {
+    return await api.get('/leaderboard/top10')
+  }
+}
+
+export const statsApi = {
+  async getStats() {
+    return await api.get('/stats')
   }
 }
 
 export const adminApi = {
-  // POST /api/admin/login
-  async login(username, password) {
-    return await apiClient.post('/admin/login', {
-      username,
-      password
-    })
+  async getUsers() {
+    return await api.get('/admin/users')
   },
 
-  // GET /api/admin/stats
-  async getStats() {
-    return await apiClient.get('/admin/stats')
+  async getReferrals() {
+    return await api.get('/admin/referrals')
   },
 
-  // GET /api/admin/users
-  async getUsers(page = 1, limit = 50) {
-    return await apiClient.get(`/admin/users?page=${page}&limit=${limit}`)
-  },
-
-  // GET /api/admin/export
-  async exportUsers(format = 'csv') {
-    return await apiClient.get(`/admin/export?format=${format}`, {
+  async exportClaimCodes() {
+    const response = await axios.get(`${API_BASE_URL}/admin/exports/claim-codes.csv`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+      },
       responseType: 'blob'
     })
+    return response.data
   }
 }

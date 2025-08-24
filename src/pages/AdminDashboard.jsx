@@ -1,71 +1,66 @@
-import React, { useState } from 'react'
-import { useAppContext } from '../contexts/AppContext'
-import { useApi } from '../hooks/useApi'
+import React, { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 import { adminApi } from '../api/endpoints'
-import AdminLogin from '../components/AdminLogin'
-import { mockAdminStats } from '../utils/mockData'
+import { Navigate } from 'react-router-dom'
 import { 
   Users, 
-  TrendingUp, 
-  DollarSign, 
-  Gift, 
-  MessageCircle, 
-  Percent,
-  ArrowLeft,
+  Download,
   Eye,
   EyeOff,
-  Download,
-  LogOut
+  ArrowLeft,
+  LogOut,
+  CheckCircle,
+  XCircle,
+  Clock
 } from 'lucide-react'
+import Button from '../components/Button'
+import Card from '../components/Card'
 
 const AdminDashboard = () => {
-  const { dispatch } = useAppContext()
-  const { loading, execute } = useApi()
-  const [adminUser, setAdminUser] = useState(null)
-  const [showCredentials, setShowCredentials] = useState(false)
-  const [stats, setStats] = useState(mockAdminStats)
+  const { user, isAuthenticated, logout } = useAuth()
+  const [users, setUsers] = useState([])
+  const [referrals, setReferrals] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showEmails, setShowEmails] = useState(false)
 
-  // Check if admin is logged in
-  React.useEffect(() => {
-    const token = localStorage.getItem('admin_token')
-    if (token) {
-      // In a real app, verify token with API
-      setAdminUser({ email: 'admin@zoggy.com', role: 'admin' })
-      loadAdminStats()
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'admin') {
+      fetchData()
     }
-  }, [])
+  }, [isAuthenticated, user])
 
-  const loadAdminStats = async () => {
+  const fetchData = async () => {
     try {
-      const result = await execute(() => adminApi.getStats())
-      if (result.success) {
-        setStats(result.stats)
-      }
+      const [usersData, referralsData] = await Promise.all([
+        adminApi.getUsers(),
+        adminApi.getReferrals()
+      ])
+      setUsers(usersData)
+      setReferrals(referralsData)
     } catch (error) {
+      console.error('Failed to fetch admin data:', error)
       // Fallback to mock data
-      console.log('Using mock admin stats')
+      setUsers([
+        { id: 1, email: 'user***@gmail.com', claimCode: 'ZOGGY-ABC123', credits: 150.50, verified: true },
+        { id: 2, email: 'crypto***@yahoo.com', claimCode: 'ZOGGY-DEF456', credits: 75.25, verified: true },
+        { id: 3, email: 'winner***@outlook.com', claimCode: 'ZOGGY-GHI789', credits: 200.00, verified: false },
+      ])
+      setReferrals([
+        { id: 1, referrer: 'user***@gmail.com', referee: 'friend***@gmail.com', status: 'completed', date: '2024-01-15' },
+        { id: 2, referrer: 'crypto***@yahoo.com', referee: 'buddy***@yahoo.com', status: 'pending', date: '2024-01-14' },
+      ])
+    } finally {
+      setLoading(false)
     }
   }
 
-  const handleLoginSuccess = (user) => {
-    setAdminUser(user)
-    loadAdminStats()
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token')
-    setAdminUser(null)
-  }
-
-  const handleExportUsers = async (format = 'csv') => {
+  const handleExportCSV = async () => {
     try {
-      const blob = await execute(() => adminApi.exportUsers(format))
-      
-      // Create download link
+      const blob = await adminApi.exportClaimCodes()
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `zoggy-users-${new Date().toISOString().split('T')[0]}.${format}`
+      link.download = `zoggy-claim-codes-${new Date().toISOString().split('T')[0]}.csv`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -75,198 +70,194 @@ const AdminDashboard = () => {
     }
   }
 
-  // Show login form if not authenticated
-  if (!adminUser) {
-    return <AdminLogin onLoginSuccess={handleLoginSuccess} />
+  const maskEmail = (email) => {
+    if (showEmails) return email
+    const [local, domain] = email.split('@')
+    return `${local.substring(0, 3)}***@${domain}`
   }
 
-  const handleBackToLanding = () => {
-    dispatch({ type: 'SET_VIEW', payload: 'landing' })
-  }
-
-  const statsConfig = [
-    {
-      title: 'Total Users',
-      value: stats.totalUsers.toLocaleString(),
-      icon: Users,
-      color: 'text-primary-600',
-      bgColor: 'bg-primary-50'
-    },
-    {
-      title: 'Signups Today',
-      value: stats.totalSignupsToday.toLocaleString(),
-      icon: TrendingUp,
-      color: 'text-success-600',
-      bgColor: 'bg-success-50'
-    },
-    {
-      title: 'Credits Distributed',
-      value: stats.totalCreditsDistributed.toLocaleString(),
-      icon: DollarSign,
-      color: 'text-warning-600',
-      bgColor: 'bg-warning-50'
-    },
-    {
-      title: 'Chests Opened',
-      value: stats.totalChestsOpened.toLocaleString(),
-      icon: Gift,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
-    },
-    {
-      title: 'Telegram Members',
-      value: stats.telegramMembers.toLocaleString(),
-      icon: MessageCircle,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50'
-    },
-    {
-      title: 'Conversion Rate',
-      value: `${stats.conversionRate}%`,
-      icon: Percent,
-      color: 'text-emerald-600',
-      bgColor: 'bg-emerald-50'
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle className="w-4 h-4 text-success-400" />
+      case 'pending':
+        return <Clock className="w-4 h-4 text-warning-400" />
+      default:
+        return <XCircle className="w-4 h-4 text-error-400" />
     }
-  ]
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-success-600 bg-opacity-20 text-success-400 border-success-600 border-opacity-30'
+      case 'pending':
+        return 'bg-warning-600 bg-opacity-20 text-warning-400 border-warning-600 border-opacity-30'
+      default:
+        return 'bg-error-600 bg-opacity-20 text-error-400 border-error-600 border-opacity-30'
+    }
+  }
+
+  // Check if user is admin
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return <Navigate to="/" replace />
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-brand border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-gray-950">
+      <header className="bg-gray-900 shadow-sm border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button
-                onClick={handleBackToLanding}
-                className="btn-secondary flex items-center space-x-2"
+              <Button
+                variant="secondary"
+                onClick={() => window.history.back()}
+                className="flex items-center space-x-2"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back to Landing</span>
-              </button>
-              <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
+                <span>Back</span>
+              </Button>
+              <h1 className="text-2xl font-bold text-white">Admin Dashboard</h1>
             </div>
             <div className="flex items-center space-x-6">
               <div className="hidden sm:block text-right">
-                <p className="text-sm text-gray-600">Logged in as</p>
-                <p className="font-semibold text-gray-800">{adminUser.email}</p>
+                <p className="text-sm text-gray-400">Logged in as</p>
+                <p className="font-semibold text-white">{user.email}</p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="btn-secondary flex items-center space-x-2"
+              <Button
+                variant="secondary"
+                onClick={logout}
+                className="flex items-center space-x-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
-              </button>
-              <img src="/logo.svg" alt="Zoggy" className="w-8 h-8" />
-              <span className="hidden sm:inline text-xl font-bold text-gray-800">Zoggy Admin</span>
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Login Credentials Info */}
-        <div className="card mb-8 bg-blue-50 border-blue-200">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-blue-800 mb-2">Demo Admin Access</h3>
-              <p className="text-blue-700">This is a mockup dashboard with demo data</p>
-            </div>
-            <button
-              onClick={() => setShowCredentials(!showCredentials)}
-              className="btn-secondary flex items-center space-x-2"
-            >
-              {showCredentials ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              <span>{showCredentials ? 'Hide' : 'Show'} Credentials</span>
-            </button>
-          </div>
-          {showCredentials && (
-            <div className="mt-4 p-4 bg-blue-100 rounded-lg">
-              <p className="text-blue-800 font-mono">
-                <strong>Username:</strong> admin@zoggy.com<br />
-                <strong>Password:</strong> zoggy2024
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {statsConfig.map((stat, index) => (
-            <div key={index} className="card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">{stat.title}</p>
-                  <p className="text-3xl font-bold text-gray-800 mt-1">{stat.value}</p>
-                </div>
-                <div className={`w-12 h-12 ${stat.bgColor} rounded-lg flex items-center justify-center`}>
-                  <stat.icon className={`w-6 h-6 ${stat.color}`} />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* Export Section */}
-        <div className="card mb-8">
+        <Card className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Export Data</h3>
-              <p className="text-gray-600">Download user data for analysis</p>
+              <h3 className="text-lg font-semibold text-white mb-2">Export Data</h3>
+              <p className="text-gray-400">Download user data for analysis</p>
             </div>
-            <div className="flex space-x-3">
-              <button
-                onClick={() => handleExportUsers('csv')}
-                disabled={loading}
-                className="btn-secondary flex items-center space-x-2"
+            <div className="flex items-center space-x-3">
+              <Button
+                variant="secondary"
+                onClick={() => setShowEmails(!showEmails)}
+                className="flex items-center space-x-2"
+              >
+                {showEmails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <span>{showEmails ? 'Hide' : 'Show'} Emails</span>
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleExportCSV}
+                className="flex items-center space-x-2"
               >
                 <Download className="w-4 h-4" />
                 <span>Export CSV</span>
-              </button>
+              </Button>
             </div>
           </div>
-        </div>
+        </Card>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Top Referrers */}
-          <div className="card">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Top Referrers</h3>
-            <div className="space-y-4">
-              {stats.topReferrers.map((referrer, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                      #{index + 1}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-800">{referrer.email}</p>
-                      <p className="text-sm text-gray-600">{referrer.referrals} referrals</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-bold text-success-600">{referrer.credits} credits</p>
-                  </div>
-                </div>
-              ))}
+          {/* Users Table */}
+          <Card>
+            <div className="flex items-center space-x-2 mb-6">
+              <Users className="w-6 h-6 text-brand" />
+              <h3 className="text-xl font-bold text-white">Users ({users.length})</h3>
             </div>
-          </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="text-left py-3 text-gray-400 font-medium">Email</th>
+                    <th className="text-left py-3 text-gray-400 font-medium">Claim Code</th>
+                    <th className="text-right py-3 text-gray-400 font-medium">Credits</th>
+                    <th className="text-center py-3 text-gray-400 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id} className="border-b border-gray-800">
+                      <td className="py-3 text-white font-mono text-sm">
+                        {maskEmail(user.email)}
+                      </td>
+                      <td className="py-3 text-gray-300 font-mono text-sm">
+                        {user.claimCode}
+                      </td>
+                      <td className="py-3 text-right text-gold font-semibold">
+                        ${user.credits.toFixed(2)}
+                      </td>
+                      <td className="py-3 text-center">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
+                          user.verified 
+                            ? 'bg-success-600 bg-opacity-20 text-success-400 border-success-600 border-opacity-30'
+                            : 'bg-warning-600 bg-opacity-20 text-warning-400 border-warning-600 border-opacity-30'
+                        }`}>
+                          {user.verified ? 'Verified' : 'Pending'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
 
-          {/* Recent Signups */}
-          <div className="card">
-            <h3 className="text-xl font-bold text-gray-800 mb-6">Recent Signups</h3>
-            <div className="space-y-4">
-              {stats.recentSignups.map((signup, index) => (
-                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <p className="font-semibold text-gray-800">{signup.email}</p>
-                    <p className="text-sm text-gray-600">Position #{signup.position.toLocaleString()}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-600">{signup.joinedAt}</p>
-                  </div>
-                </div>
-              ))}
+          {/* Referrals Table */}
+          <Card>
+            <h3 className="text-xl font-bold text-white mb-6">Referrals ({referrals.length})</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="text-left py-3 text-gray-400 font-medium">Referrer</th>
+                    <th className="text-left py-3 text-gray-400 font-medium">Referee</th>
+                    <th className="text-center py-3 text-gray-400 font-medium">Status</th>
+                    <th className="text-right py-3 text-gray-400 font-medium">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {referrals.map((referral) => (
+                    <tr key={referral.id} className="border-b border-gray-800">
+                      <td className="py-3 text-white font-mono text-sm">
+                        {maskEmail(referral.referrer)}
+                      </td>
+                      <td className="py-3 text-gray-300 font-mono text-sm">
+                        {maskEmail(referral.referee)}
+                      </td>
+                      <td className="py-3 text-center">
+                        <div className="flex items-center justify-center space-x-1">
+                          {getStatusIcon(referral.status)}
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(referral.status)}`}>
+                            {referral.status}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3 text-right text-gray-400 text-sm">
+                        {referral.date}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
+          </Card>
         </div>
       </main>
     </div>

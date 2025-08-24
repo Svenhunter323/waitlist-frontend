@@ -1,31 +1,28 @@
 import React from 'react'
-import { useApi } from '../hooks/useApi'
 import { telegramApi } from '../api/endpoints'
-import { useAppContext } from '../contexts/AppContext'
 import { X, MessageCircle, ExternalLink, CheckCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Button from './Button'
 
 const TelegramModal = ({ onClose, onJoinTelegram }) => {
-  const { user } = useAppContext()
-  const { execute } = useApi()
 
   const handleJoinTelegram = async () => {
     try {
       // Get Telegram deeplink from API
-      const result = await execute(() => telegramApi.getTelegramDeeplink(user.id))
+      const result = await telegramApi.getDeeplink()
       
-      if (result.success) {
+      if (result.deeplink) {
         // Open Telegram with deeplink
         window.open(result.deeplink, '_blank')
         
         // Also open the channel link
         setTimeout(() => {
-          window.open(result.channelLink, '_blank')
+          window.open(process.env.REACT_APP_TG_CHANNEL_HANDLE ? `https://t.me/${process.env.REACT_APP_TG_CHANNEL_HANDLE.replace('@', '')}` : 'https://t.me/zoggycasino', '_blank')
         }, 1000)
       }
     } catch (error) {
       // Fallback to direct channel link
-      window.open('https://t.me/zoggycasino', '_blank')
+      window.open(process.env.REACT_APP_TG_CHANNEL_HANDLE ? `https://t.me/${process.env.REACT_APP_TG_CHANNEL_HANDLE.replace('@', '')}` : 'https://t.me/zoggycasino', '_blank')
     }
     
     // Simulate user joining verification
@@ -41,11 +38,11 @@ const TelegramModal = ({ onClose, onJoinTelegram }) => {
           initial={{ scale: 0.8, opacity: 0, y: 50 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.8, opacity: 0, y: 50 }}
-          className="bg-white rounded-2xl p-8 max-w-md w-full text-center relative shadow-2xl"
+          className="bg-gray-800 rounded-2xl p-8 max-w-md w-full text-center relative shadow-2xl border border-gray-700"
         >
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-300 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -54,47 +51,49 @@ const TelegramModal = ({ onClose, onJoinTelegram }) => {
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
               <MessageCircle className="w-10 h-10 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">Join Our Telegram</h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <h2 className="text-3xl font-bold text-white mb-4">Join Our Telegram</h2>
+            <p className="text-gray-300 text-lg leading-relaxed">
               You must join our Telegram community to unlock chest opening and start earning rewards!
             </p>
           </div>
 
-          <div className="bg-blue-50 rounded-xl p-6 mb-6 border border-blue-200">
-            <h3 className="text-blue-800 font-semibold mb-3 flex items-center justify-center space-x-2">
+          <div className="bg-blue-600 bg-opacity-10 rounded-xl p-6 mb-6 border border-blue-600 border-opacity-20">
+            <h3 className="text-blue-400 font-semibold mb-3 flex items-center justify-center space-x-2">
               <CheckCircle className="w-5 h-5" />
               <span>What you'll get:</span>
             </h3>
-            <ul className="text-blue-700 space-y-2">
+            <ul className="text-blue-300 space-y-2">
               <li className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                 <span>Daily chest access</span>
               </li>
               <li className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                 <span>Exclusive rewards & bonuses</span>
               </li>
               <li className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                 <span>Community updates & tips</span>
               </li>
               <li className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                 <span>Early access to new features</span>
               </li>
             </ul>
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="lg"
             onClick={handleJoinTelegram}
-            className="btn-primary w-full text-lg flex items-center justify-center space-x-2 py-4"
+            className="w-full flex items-center justify-center space-x-2"
           >
             <MessageCircle className="w-5 h-5" />
             <span>Join Telegram Community</span>
             <ExternalLink className="w-4 h-4" />
-          </button>
+          </Button>
 
-          <p className="text-xs text-gray-500 mt-4">
+          <p className="text-xs text-gray-400 mt-4">
             After joining, return here to open your first chest!
           </p>
         </motion.div>

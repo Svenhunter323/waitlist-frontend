@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, AlertCircle, X, Info } from 'lucide-react'
 
-const NotificationToast = ({ 
+const Toast = ({ 
   message, 
   type = 'info', 
   duration = 4000, 
@@ -14,7 +14,7 @@ const NotificationToast = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false)
-      setTimeout(onClose, 300) // Wait for exit animation
+      setTimeout(onClose, 300)
     }, duration)
 
     return () => clearTimeout(timer)
@@ -28,13 +28,13 @@ const NotificationToast = ({
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle className="w-5 h-5 text-success-600" />
+        return <CheckCircle className="w-5 h-5 text-success-400" />
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-error-600" />
+        return <AlertCircle className="w-5 h-5 text-error-400" />
       case 'warning':
-        return <AlertCircle className="w-5 h-5 text-warning-600" />
+        return <AlertCircle className="w-5 h-5 text-warning-400" />
       default:
-        return <Info className="w-5 h-5 text-primary-600" />
+        return <Info className="w-5 h-5 text-brand" />
     }
   }
 
@@ -42,13 +42,13 @@ const NotificationToast = ({
     const baseStyles = 'border-l-4'
     switch (type) {
       case 'success':
-        return `${baseStyles} bg-success-50 border-success-500`
+        return `${baseStyles} bg-success-900 border-success-400`
       case 'error':
-        return `${baseStyles} bg-error-50 border-error-500`
+        return `${baseStyles} bg-error-900 border-error-400`
       case 'warning':
-        return `${baseStyles} bg-warning-50 border-warning-500`
+        return `${baseStyles} bg-warning-900 border-warning-400`
       default:
-        return `${baseStyles} bg-primary-50 border-primary-500`
+        return `${baseStyles} bg-gray-800 border-brand`
     }
   }
 
@@ -86,13 +86,13 @@ const NotificationToast = ({
                 {getIcon()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800">
+                <p className="text-sm font-medium text-white">
                   {message}
                 </p>
               </div>
               <button
                 onClick={handleClose}
-                className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors"
+                className="flex-shrink-0 text-gray-400 hover:text-gray-300 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -104,4 +104,4 @@ const NotificationToast = ({
   )
 }
 
-export default NotificationToast
+export default Toast

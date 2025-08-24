@@ -1,28 +1,32 @@
 import React, { useState, useEffect } from 'react'
-import { useAppContext } from '../contexts/AppContext'
+import { useAuth } from '../contexts/AuthContext'
+import { chestApi } from '../api/endpoints'
 import { Gift, Clock, Star } from 'lucide-react'
-import { canOpenChest, getNextChestTime } from '../utils/userUtils'
+import { generateChestReward } from '../utils/rewards'
+import Button from './Button'
+import Card from './Card'
 import ChestModal from './ChestModal'
 import TelegramModal from './TelegramModal'
+import Countdown from './Countdown'
 
 const DailyChest = () => {
-  const { user, dispatch } = useAppContext()
+  const { user, dispatch } = useAuth()
   const [showChestModal, setShowChestModal] = useState(false)
   const [showTelegramModal, setShowTelegramModal] = useState(false)
-  const [countdown, setCountdown] = useState('')
-
-  const canOpen = canOpenChest(user?.lastChestOpen)
+  const [canOpen, setCanOpen] = useState(false)
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCountdown(getNextChestTime(user?.lastChestOpen))
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [user?.lastChestOpen])
+    if (user?.nextChestAt) {
+      const now = new Date()
+      const nextChest = new Date(user.nextChestAt)
+      setCanOpen(now >= nextChest)
+    } else {
+      setCanOpen(true) // First chest
+    }
+  }, [user?.nextChestAt])
 
   const handleOpenChest = () => {
-    if (!user?.hasJoinedTelegram) {
+    if (!user?.telegramVerified) {
       setShowTelegramModal(true)
       return
     }
@@ -32,36 +36,47 @@ const DailyChest = () => {
     }
   }
 
-  const handleChestOpened = (reward) => {
+  const handleChestOpened = async (reward) => {
     setShowChestModal(false)
-    dispatch({ type: 'OPEN_CHEST' })
+    
+    try {
+      const result = await chestApi.openChest()
+      dispatch({ 
+        type: 'APPLY_REWARD', 
+        payload: { 
+          amount: result.amount || reward,
+          nextChestAt: result.nextChestAt || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        }
+      })
+    } catch (error) {
+      // Fallback to frontend logic
+      const fallbackReward = generateChestReward(!user?.lastChestOpenAt)
+      dispatch({ type: 'APPLY_REWARD', payload: { amount: fallbackReward, nextChestAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() } })
+    }
   }
 
   const handleJoinTelegram = () => {
     setShowTelegramModal(false)
-    dispatch({ 
-      type: 'UPDATE_USER', 
-      payload: { hasJoinedTelegram: true } 
-    })
+    dispatch({ type: 'SET_TELEGRAM_VERIFIED', payload: true })
   }
 
   if (!user || !user.emailVerified) return null
 
   return (
-    <section className="py-20 px-6 bg-gradient-to-br from-gold-50 to-warning-50">
+    <section className="py-20 px-6 bg-gray-950">
       <div className="max-w-4xl mx-auto text-center">
         <div className="mb-8">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Star className="w-8 h-8 text-gold-500" />
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white">Daily Chest</h2>
-            <Star className="w-8 h-8 text-gold-500" />
+            <Star className="w-8 h-8 text-gold" />
+            <h2 className="text-4xl md:text-5xl font-bold text-white">Daily Chest</h2>
+            <Star className="w-8 h-8 text-gold" />
           </div>
-          <p className="text-xl text-gray-600 dark:text-gray-300">Open your daily chest to win amazing prizes!</p>
+          <p className="text-xl text-gray-300">Open your daily chest to win amazing prizes!</p>
         </div>
         
-        <div className="card max-w-md mx-auto bg-gradient-to-br from-white to-gold-50 dark:from-gray-800 dark:to-gray-700 border-gold-200 dark:border-gray-600">
+        <Card className="max-w-md mx-auto bg-gradient-to-br from-gray-800 to-gray-700 border-gold border-opacity-20">
           <div className="w-32 h-32 mx-auto mb-6 relative">
-            <div className={`w-full h-full bg-gradient-to-br from-gold-400 to-gold-600 rounded-2xl shadow-2xl flex items-center justify-center transform transition-all duration-300 ${
+            <div className={`w-full h-full bg-gradient-to-br from-gold to-gold-600 rounded-2xl shadow-2xl flex items-center justify-center transform transition-all duration-300 ${
               canOpen ? 'animate-float hover:scale-110 chest-glow cursor-pointer' : 'opacity-60'
             }`}>
               <Gift className="w-16 h-16 text-white drop-shadow-lg" />
@@ -75,34 +90,41 @@ const DailyChest = () => {
           
           {canOpen ? (
             <div className="space-y-4">
-              <button
+              <Button
+                variant="gold"
+                size="lg"
                 onClick={handleOpenChest}
-                className="btn-warning text-lg px-8 py-4 w-full font-bold text-white shadow-xl"
+                className="w-full"
               >
                 🎁 Open Daily Chest
-              </button>
+              </Button>
               <p className="text-sm text-gray-600">
-                {user.hasJoinedTelegram ? 'Click to open your chest!' : 'Join Telegram first to unlock'}
+                {user.telegramVerified ? 'Click to open your chest!' : 'Join Telegram first to unlock'}
               </p>
             </div>
           ) : (
             <div className="text-center space-y-4">
-              <button
+              <Button
+                variant="secondary"
+                size="lg"
                 disabled
-                className="btn-secondary opacity-50 cursor-not-allowed text-lg px-8 py-4 w-full"
+                className="w-full opacity-50"
               >
                 Chest Already Opened
-              </button>
-              <div className="flex items-center justify-center space-x-2 text-gray-600">
-                <Clock className="w-5 h-5" />
-                <span className="font-mono text-lg font-bold">Next chest in {countdown}</span>
+              </Button>
+              <div className="flex items-center justify-center space-x-2 text-gray-300">
+                <span className="text-sm">Next chest in</span>
+                <Countdown 
+                  targetDate={user.nextChestAt}
+                  onComplete={() => setCanOpen(true)}
+                />
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Come back tomorrow for another chance to win!
               </p>
             </div>
           )}
-        </div>
+        </Card>
 
         {showChestModal && (
           <ChestModal

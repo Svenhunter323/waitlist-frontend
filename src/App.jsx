@@ -1,35 +1,25 @@
 import React from 'react'
-import { useAppContext } from './contexts/AppContext'
-import ErrorBoundary from './components/ErrorBoundary'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import LandingPage from './pages/LandingPage'
+import VerifyEmail from './pages/VerifyEmail'
 import Dashboard from './pages/Dashboard'
-import EmailVerification from './pages/EmailVerification'
 import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
-  const { currentView } = useAppContext()
-
-  console.log(currentView);
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'dashboard':
-        return <Dashboard />
-      case 'email-verification':
-        return <EmailVerification />
-      case 'admin':
-        return <AdminDashboard />
-      default:
-        return <LandingPage />
-    }
-  }
-
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-white">
-        {renderCurrentView()}
-      </div>
-    </ErrorBoundary>
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-gray-950">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   )
 }
 

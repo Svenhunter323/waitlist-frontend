@@ -1,62 +1,89 @@
 import React from 'react'
-import { useAppContext } from '../contexts/AppContext'
+import { useState, useEffect } from 'react'
+import { statsApi } from '../api/endpoints'
 import { Users, Gift, DollarSign, TrendingUp } from 'lucide-react'
+import Card from './Card'
 
 const StatsSection = () => {
-  const { totalUsers } = useAppContext()
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalReferrals: 0,
+    chestsOpened: 0,
+    joinedToday: 0
+  })
 
-  const stats = [
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await statsApi.getStats()
+        setStats(data)
+      } catch (error) {
+        console.error('Failed to fetch stats:', error)
+        // Fallback to mock data
+        setStats({
+          totalUsers: 12847,
+          totalReferrals: 3421,
+          chestsOpened: 8934,
+          joinedToday: 234
+        })
+      }
+    }
+    
+    fetchStats()
+  }, [])
+
+  const statsConfig = [
     {
       icon: Users,
-      value: totalUsers.toLocaleString(),
+      value: stats.totalUsers.toLocaleString(),
       label: 'Users Joined',
-      color: 'text-primary-600',
-      bgColor: 'bg-primary-50'
+      color: 'text-brand',
+      bgColor: 'bg-brand bg-opacity-10'
     },
     {
       icon: Gift,
-      value: '8,934',
+      value: stats.chestsOpened.toLocaleString(),
       label: 'Chests Opened',
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50'
+      bgColor: 'bg-purple-600 bg-opacity-10'
     },
     {
       icon: DollarSign,
-      value: '$1.2M',
-      label: 'Total Rewards',
+      value: stats.totalReferrals.toLocaleString(),
+      label: 'Total Referrals',
       color: 'text-success-600',
-      bgColor: 'bg-success-50'
+      bgColor: 'bg-success-600 bg-opacity-10'
     },
     {
       icon: TrendingUp,
-      value: '234',
+      value: stats.joinedToday.toLocaleString(),
       label: 'Joined Today',
-      color: 'text-warning-600',
-      bgColor: 'bg-warning-50'
+      color: 'text-gold',
+      bgColor: 'bg-gold bg-opacity-10'
     }
   ]
 
   return (
-    <section className="py-20 px-6 bg-white dark:bg-gray-900">
+    <section className="py-20 px-6 bg-gray-900">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 dark:text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             Join the Community
           </h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Thousands of users are already earning daily rewards. Don't miss out on your chance to win big.
           </p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="card text-center hover:scale-105 transition-transform duration-300 dark:bg-gray-800 dark:border-gray-700">
+          {statsConfig.map((stat, index) => (
+            <Card key={index} className="text-center">
               <div className={`w-16 h-16 ${stat.bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
                 <stat.icon className={`w-8 h-8 ${stat.color}`} />
               </div>
-              <p className="text-3xl font-bold text-gray-800 dark:text-white mb-2">{stat.value}</p>
-              <p className="text-gray-600 dark:text-gray-300 font-medium">{stat.label}</p>
-            </div>
+              <p className="text-3xl font-bold text-white mb-2">{stat.value}</p>
+              <p className="text-gray-300 font-medium">{stat.label}</p>
+            </Card>
           ))}
         </div>
       </div>
