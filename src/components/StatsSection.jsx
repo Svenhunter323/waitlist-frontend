@@ -16,7 +16,12 @@ const StatsSection = () => {
     const fetchStats = async () => {
       try {
         const data = await statsApi.getStats()
-        setStats(data)
+        setStats({
+          totalUsers: data.totalUsers || 0,
+          totalReferrals: data.totalReferrals || 0,
+          chestsOpened: data.chestsOpened || 0,
+          joinedToday: data.joinedToday || 0
+        })
       } catch (error) {
         console.error('Failed to fetch stats:', error)
         // Fallback to mock data
