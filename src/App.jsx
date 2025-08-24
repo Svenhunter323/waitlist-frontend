@@ -9,6 +9,8 @@ import AdminDashboard from './pages/AdminDashboard'
 function App() {
   const { currentView } = useAppContext()
 
+  console.log(currentView);
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
